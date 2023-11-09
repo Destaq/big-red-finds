@@ -13,16 +13,18 @@ import IconButton from '@mui/material/IconButton';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { Menu, MenuItem } from '@mui/material';
 import Chip from '@mui/material/Chip';
+import ConfirmDeleteModal from './ConfirmDeleteModal';
 
-export default function RecipeReviewCard(props: {
+export default function InfoCard(props: {
   avatarName: string;
   avatarNetID: string;
   datetime: Date;
   imageURL: string;
-  found: boolean,
+  found: boolean;
   description?: string;
 }) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false); // State for the delete modal
   
   const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -33,62 +35,73 @@ export default function RecipeReviewCard(props: {
   };
 
   return (
-    <Card sx={{ maxWidth: 345 }}>
-      <CardHeader
-        avatar={
-          <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-            {props.avatarName.slice(0, 1)}
-          </Avatar>
-        }
-        title={props.avatarName + " – " + props.avatarNetID + "@cornell.edu"}
-        action={
-          <div>
-            <IconButton
-              aria-label="settings"
-              onClick={handleOpenMenu}
-            >
-              <MoreVertIcon />
-            </IconButton>
-            <Menu
-              id="long-menu"
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-              MenuListProps={{
-                'aria-labelledby': 'long-button',
-              }}
-            >
-              <MenuItem key={"edit"} onClick={handleClose}>
-                Edit
-              </MenuItem>
-              <MenuItem key={"delete"} onClick={handleClose}>
-                Delete
-              </MenuItem>
-            </Menu>
-          </div>
-        }
-        subheader={props.datetime.toLocaleString()}
-      />
-      <CardMedia
-        component="img"
-        height="194"
-        image={props.imageURL}
-        alt="Lost and found item"
-        className="p-4 border-t border-b"
-      />
-      <CardContent>
-        <Typography variant="body2" color="text.secondary">
-          {props.description}
-        </Typography>
-      </CardContent>
-      <CardActions disableSpacing className="-mt-2 mb-2 flex justify-center">
-        {!props.found &&
-          <Chip label="Mark as Found" className="cursor-pointer" />
-        }
-        {props.found &&
-          <Chip label="Claimed Found" color="success" />
-        }
-      </CardActions>
-    </Card>
+    <div>
+      <Card sx={{ maxWidth: 345 }}>
+        <CardHeader
+          avatar={
+            <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
+              {props.avatarName.slice(0, 1)}
+            </Avatar>
+          }
+          title={props.avatarName + " – " + props.avatarNetID + "@cornell.edu"}
+          action={
+            <div>
+              <IconButton
+                aria-label="settings"
+                onClick={handleOpenMenu}
+              >
+                <MoreVertIcon />
+              </IconButton>
+              <Menu
+                id="long-menu"
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+                MenuListProps={{
+                  'aria-labelledby': 'long-button',
+                }}
+              >
+                <MenuItem key={"edit"} onClick={handleClose}>
+                  Edit
+                </MenuItem>
+                <MenuItem key={"delete"} onClick={() => {
+                  setIsDeleteModalOpen(true);
+                  handleClose(); // Close the menu after opening the modal
+                }}>
+                  Delete
+                </MenuItem>
+              </Menu>
+            </div>
+          }
+          subheader={props.datetime.toLocaleString()}
+        />
+        <CardMedia
+          component="img"
+          height="194"
+          image={props.imageURL}
+          alt="Lost and found item"
+          className="p-4 border-t border-b"
+        />
+        <CardContent>
+          <Typography variant="body2" color="text.secondary">
+            {props.description}
+          </Typography>
+        </CardContent>
+        <CardActions disableSpacing className="-mt-2 mb-2 flex justify-center">
+          {!props.found &&
+            <Chip label="Mark as Found" className="cursor-pointer" />
+          }
+          {props.found &&
+            <Chip label="Claimed Found" color="success" />
+          }
+        </CardActions>
+      </Card>
+      {isDeleteModalOpen && 
+        <ConfirmDeleteModal
+          open={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+        />
+      }
+    </div>
   );
 }
