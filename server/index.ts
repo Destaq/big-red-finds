@@ -13,11 +13,19 @@ app.listen(port, () => {
 });
 
 // Routes required:
-// create post, delete post, edit post (Simon)
-// login / register, get posts, toggle claimed (Nitya)
+// login / register, get posts, create post (Simon)
+// NOTE: login / register is frontend-only
+// edit post, delete post, toggle claimed (Nitya)
 
-app.post("/toggle-claimed", async (req, res) => {
-    // TODO: toggle claimed with firebase.
+app.get("/get", async (req, res) => {
+    let offset = req.query.offset ?? 0;
+    let amount = req.query.amount ?? 20;
+
+    // TODO: get with this information, sort by date
+});
+
+app.post("/create", async (req, res) => {
+    // TODO: create with firebase
 });
 
 app.delete("/delete/:id", async (req, res) => {
@@ -28,17 +36,6 @@ app.put("/edit/:id", async (req, res) => {
     // TODO: edit with firebase
 });
 
-app.post("/login", async (req, res) => {
-    // TODO: login with firebase
-});
-
-app.post("/register", async (req, res) => {
-    // TODO: register with firebase
-});
-
-app.get("/get", async (req, res) => {
-    let offset = req.query.offset ?? 0;
-    let amount = req.query.amount ?? 20;
-
-    // TODO: get with this information, sort by date
+app.post("/toggle-claimed", async (req, res) => {
+    // TODO: toggle claimed with firebase.
 });

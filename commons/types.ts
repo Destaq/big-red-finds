@@ -1,5 +1,5 @@
-interface Post {
-    ownerName: string; // fkey on User
+type Post = {
+    owner: User;
     datetime: Date;
     imageURL: string;
     found: boolean;
@@ -7,7 +7,10 @@ interface Post {
 }
 
 // Rough draft, this might be handled by Firebase.
-interface User {
-    netID: string;
-    name: string; // Firstname Lastname
+type User = {
+    displayName: string; // Firstname Lastname
+    email: string;
+    photoURL: string;
 }
+
+export type { Post, User };
