@@ -80,6 +80,7 @@ export default function InfoCard(props: Post) {
                     component="img"
                     height="194"
                     image={props.imageURL}
+                    src={props.imageURL}
                     alt="Lost and found item"
                     className="p-4 border-t border-b"
                 />

@@ -1,6 +1,9 @@
 type Post = {
-    owner: User;
-    datetime: Date;
+    owner: {
+        displayName: string,
+        email: string,
+    };
+    datetime: string;
     imageURL: string;
     found: boolean;
     description?: string; // maybe ask to include location

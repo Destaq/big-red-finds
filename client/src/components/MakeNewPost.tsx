@@ -1,13 +1,24 @@
-"use client"
+"use client";
 
-import React from "react";
+import React, { useState, useRef, useContext } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
-import { TextareaAutosize as BaseTextareaAutosize } from "@mui/base/TextareaAutosize";
 import Button from "@mui/material/Button";
-import { styled } from "@mui/material/styles";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { collection, addDoc } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
+import {
+    getStorage,
+    ref,
+    uploadBytesResumable,
+    getDownloadURL,
+} from "firebase/storage";
+import { type User } from "../../../commons/types";
+import { UserContext } from "../app/UserProvider";
+import { CircularProgress } from "@mui/material";
+import moment from "moment";
+import { type Moment as TMoment } from "moment";
 
 const style = {
     position: "absolute" as "absolute",
@@ -21,83 +32,114 @@ const style = {
     p: 4,
 };
 
-const VisuallyHiddenInput = styled("input")({
-    clip: "rect(0 0 0 0)",
-    clipPath: "inset(50%)",
-    height: 1,
-    overflow: "hidden",
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    whiteSpace: "nowrap",
-    width: 1,
-});
+interface MakeNewPostProps {
+    open: boolean;
+    onClose: () => void;
+    onPostCreated?: (post: {
+      owner: {
+          displayName: string | undefined,
+          email: string | undefined,
+          photoURL: string | undefined,
+      },
+      datetime: Date | TMoment,
+      imageURL: string,
+      found: boolean,
+      description: string,
+    }) => void;
+  }
 
-const MakeNewPost = (props: { open: boolean; onClose: () => void }) => {
-    const { open, onClose } = props; // Destructuring props
+const MakeNewPost = (props: MakeNewPostProps) => {
+    const { onPostCreated, open, onClose } = props;
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [textAreaValue, setTextAreaValue] = useState("");
+    const fileInput = useRef(null);
+    const [loading, setLoading] = useState(false);
 
-    const blue = {
-        100: "#DAECFF",
-        200: "#b6daff",
-        400: "#3399FF",
-        500: "#007FFF",
-        600: "#0072E5",
-        900: "#003A75",
+    let user: User | null = (useContext(UserContext) as unknown) as User | null;
+
+    // New object for firestore
+    const firestore = getFirestore();
+
+    // New object for firebase storage
+    const storage = getStorage();
+
+    const uploadImageToFirebase = async (file: File) => {
+        const storageRef = ref(storage, "images/" + file.name);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+    
+        setLoading(true);
+    
+        return new Promise<string>((resolve, reject) => {
+            uploadTask.on(
+                "state_changed",
+                (snapshot) => {
+                    var progress =
+                        (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log("Upload is " + progress + "% done");
+                },
+                (error) => {
+                    console.log(error);
+                    reject(error);
+                }, 
+                async () => {
+                    try {
+                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                        resolve(downloadURL as string);
+                    } catch (error) {
+                        reject(error);
+                    }
+                }
+            );
+        })
     };
 
-    const grey = {
-        50: "#F3F6F9",
-        100: "#E5EAF2",
-        200: "#DAE2ED",
-        300: "#C7D0DD",
-        400: "#B0B8C4",
-        500: "#9DA8B7",
-        600: "#6B7A90",
-        700: "#434D5B",
-        800: "#303740",
-        900: "#1C2025",
-    };
+    // Add click handler here
+    const handleAddPost = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        if (!selectedFile) {
+            alert("Please select an image to upload.");
+            return;
+        }
+        if (!textAreaValue) {
+            alert("Please enter a description.");
+            return;
+        }
 
-    const Textarea = styled(BaseTextareaAutosize)(
-        ({ theme }) => `
-            width: 320px;
-            font-family: IBM Plex Sans, sans-serif;
-            font-size: 0.875rem;
-            font-weight: 400;
-            line-height: 1.5;
-            padding: 8px 12px;
-            border-radius: 8px;
-            color: ${theme.palette.mode === "dark" ? grey[300] : grey[900]};
-            background: ${theme.palette.mode === "dark" ? grey[900] : "#fff"};
-            border: 1px solid ${
-                theme.palette.mode === "dark" ? grey[700] : grey[200]
-            };
-            box-shadow: 0px 2px 2px ${
-                theme.palette.mode === "dark" ? grey[900] : grey[50]
+        try {
+            const imageUrl = await uploadImageToFirebase(selectedFile);
+            const post = {
+                owner: {
+                    displayName: user?.displayName,
+                    email: user?.email,
+                    photoURL: user?.photoURL,
+                },
+                datetime: new Date() as Date | TMoment,
+                imageURL: imageUrl,
+                found: false,
+                description: textAreaValue,
             };
         
-            &:hover {
-            border-color: ${blue[400]};
+            await addDoc(collection(firestore, "posts"), post); 
+            console.log("Document written");
+            if (post && post.owner) {
+                // Convert to momentjs timestamp. Since calling toDate() on the frontend.
+                post.datetime = moment(post.datetime);
+                onPostCreated!(post); // add the new post to the frontend view
             }
-        
-            &:focus {
-            border-color: ${blue[400]};
-            box-shadow: 0 0 0 3px ${
-                theme.palette.mode === "dark" ? blue[600] : blue[200]
-            };
-            }
-        
-            // firefox
-            &:focus-visible {
-            outline: 0;
-            }
-        `
-    );
+        } catch (e) {
+            console.error("Error adding document: ", e);
+        } finally {
+            setLoading(false); // End loading
+            onClose(); // Close modal
+            setTextAreaValue(""); // Clear text area
+            setSelectedFile(null); // Clear file input
+        }
+    };
 
     return (
         <Modal
-            open={open} // Using the 'open' prop directly
-            onClose={onClose} // Using the 'onClose' prop directly
+            open={open}
+            onClose={onClose}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
         >
@@ -108,19 +150,55 @@ const MakeNewPost = (props: { open: boolean; onClose: () => void }) => {
                 >
                     Create new post
                 </Typography>
-                <Textarea
-                    aria-label="minimum height"
-                    minRows={3}
+                <textarea
+                    rows={4}
                     placeholder="Describe the item and/or where you found it."
+                    className="border-2 border-gray-300 rounded-md w-full p-2"
+                    value={textAreaValue}
+                    onChange={(e) => setTextAreaValue(e.target.value)}
                 />
                 <Button
                     className="bg-blue-600 text-white mt-2 flex mx-auto items-center justify-center self-center"
                     variant="contained"
+                    size="small"
+                    onClick={() => {
+                        if (fileInput.current) {
+                            (fileInput.current as any).click();
+                        }
+                    }}
                     startIcon={<CloudUploadIcon />}
                 >
                     Upload image
-                    <VisuallyHiddenInput type="file" />
+                    <input
+                        type="file"
+                        hidden
+                        ref={fileInput}
+                        onChange={(e) => setSelectedFile(e.target.files![0])} // Save the file into state when selected
+                    />
                 </Button>
+                {loading ? (
+                    <div className="flex justify-center mt-4">
+                        <CircularProgress className="flex justify-center" size={30} />
+                    </div>
+                ) : (
+                    <div className="flex justify-center gap-2 mt-2">
+                        <Button
+                            className="mt-2 items-center justify-center self-center bg-green-700"
+                            variant="contained"
+                            color="success"
+                            onClick={handleAddPost}
+                        >
+                            Add
+                        </Button>
+                        <Button
+                            className="mt-2 items-center justify-center self-center"
+                            variant="outlined"
+                            onClick={onClose}
+                        >
+                            Cancel
+                        </Button>
+                    </div>
+                )}
             </Box>
         </Modal>
     );

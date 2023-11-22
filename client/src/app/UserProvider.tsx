@@ -9,7 +9,7 @@ export const UserContext = createContext(null);
 
 export function UserProvider({ children }) {
     const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true); // Add this
+    const [loading, setLoading] = useState(true);
     const auth = getAuth();
 
     useEffect(() => {
