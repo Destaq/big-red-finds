@@ -30,6 +30,13 @@ export default function InfoCard(props: Post) {
         setAnchorEl(null);
     };
 
+    const handleDelete = () => {
+        // Add your delete logic here
+        console.log("Deleting the listing...");
+    };
+    
+    
+
     return (
         <div>
             <Card sx={{ maxWidth: 345 }}>
@@ -118,6 +125,7 @@ export default function InfoCard(props: Post) {
                 <ConfirmDeleteModal
                     open={isDeleteModalOpen}
                     onClose={() => setIsDeleteModalOpen(false)}
+                    onDelete={handleDelete}
                 />
             )}
         </div>

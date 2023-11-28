@@ -19,6 +19,7 @@ const style = {
 export default function ConfirmDeleteModal(props: {
     onClose: () => void;
     open: boolean;
+    onDelete: () => void; //function when deleted
 }) {
     return (
         <div>
@@ -46,6 +47,7 @@ export default function ConfirmDeleteModal(props: {
                             color="error"
                             variant="contained"
                             className="bg-red-600"
+                            onClick={props.onDelete} 
                         >
                             Delete
                         </Button>
