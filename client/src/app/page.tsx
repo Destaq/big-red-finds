@@ -286,6 +286,7 @@ export default function Home() {
                                 description={post.description}
                                 datetime={post.datetime.toDate()}
                                 found={post.found}
+                                location={post.location}
                             />
                         ))}
                     </div>

@@ -6,6 +6,7 @@ import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import Button from "@mui/material/Button";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { collection, addDoc } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
 import {
@@ -45,6 +46,7 @@ interface MakeNewPostProps {
       imageURL: string,
       found: boolean,
       description: string,
+      location?: string
     }) => void;
   }
 
@@ -54,6 +56,8 @@ const MakeNewPost = (props: MakeNewPostProps) => {
     const [textAreaValue, setTextAreaValue] = useState("");
     const fileInput = useRef(null);
     const [loading, setLoading] = useState(false);
+    const [location, setLocation] = useState("");
+
 
     let user: User | null = (useContext(UserContext) as unknown) as User | null;
 
@@ -117,6 +121,7 @@ const MakeNewPost = (props: MakeNewPostProps) => {
                 imageURL: imageUrl,
                 found: false,
                 description: textAreaValue,
+                location: location,
             };
         
             await addDoc(collection(firestore, "posts"), post); 
@@ -133,6 +138,7 @@ const MakeNewPost = (props: MakeNewPostProps) => {
             onClose(); // Close modal
             setTextAreaValue(""); // Clear text area
             setSelectedFile(null); // Clear file input
+            setLocation("")
         }
     };
 
@@ -152,12 +158,19 @@ const MakeNewPost = (props: MakeNewPostProps) => {
                 </Typography>
                 <textarea
                     rows={4}
-                    placeholder="Describe the item and/or where you found it."
+                    placeholder="Describe the item."
                     className="border-2 border-gray-300 rounded-md w-full p-2"
                     value={textAreaValue}
                     onChange={(e) => setTextAreaValue(e.target.value)}
                 />
-                <Button
+                <input
+                    type="text"
+                    placeholder="Where did you find the item?"
+                    className="border-2 border-gray-300 rounded-md w-full p-2 mt-2"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                />
+                   <Button
                     className="bg-blue-600 text-white mt-2 flex mx-auto items-center justify-center self-center"
                     variant="contained"
                     size="small"
@@ -175,6 +188,9 @@ const MakeNewPost = (props: MakeNewPostProps) => {
                         ref={fileInput}
                         onChange={(e) => setSelectedFile(e.target.files![0])} // Save the file into state when selected
                     />
+
+     
+
                 </Button>
                 {loading ? (
                     <div className="flex justify-center mt-4">

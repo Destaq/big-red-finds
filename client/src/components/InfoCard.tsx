@@ -15,6 +15,8 @@ import { Menu, MenuItem } from "@mui/material";
 import Chip from "@mui/material/Chip";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 import { type Post } from "../../../commons/types";
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+
 
 export default function InfoCard(props: Post) {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -87,6 +89,10 @@ export default function InfoCard(props: Post) {
                 <CardContent>
                     <Typography variant="body2" color="text.secondary">
                         {props.description}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                        <LocationOnIcon fontSize="small" sx={{ marginRight: '4px' }}></LocationOnIcon>
+                        {props.location}
                     </Typography>
                 </CardContent>
                 <CardActions

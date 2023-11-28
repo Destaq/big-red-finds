@@ -7,6 +7,7 @@ type Post = {
     imageURL: string;
     found: boolean;
     description?: string; // maybe ask to include location
+    location?: string;
 }
 
 // Rough draft, this might be handled by Firebase.
