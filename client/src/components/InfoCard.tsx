@@ -14,7 +14,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Menu, MenuItem } from "@mui/material";
 import Chip from "@mui/material/Chip";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
-import MakeNewPost from "./MakeNewPost";
+import UpdatePost from "./UpdatePost";
 import { type Post } from "../../../commons/types";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { deleteDoc, doc,updateDoc } from "firebase/firestore";
@@ -71,12 +71,7 @@ export default function InfoCard(props: Post) {
         try {
             const postDocRef = doc(getFirestore(), "posts", props.id) as any; 
             await updateDoc(postDocRef,{found:true});
-
             
-            // await postDocRef.updateDoc({
-            //     found: true,
-            // });
-          setIsFound(true);
           props.handleStateChange(postDocRef,false);
           console.log("Post marked as found!");
         } catch (error) {
@@ -186,9 +181,10 @@ export default function InfoCard(props: Post) {
                 )
             }
             {isUpdateModalOpen && (
-                    <MakeNewPost
+                    <UpdatePost
                         open={isUpdateModalOpen}
                         onClose={() => setIsUpdateModalOpen(false)}
+                        myPost={props}
                         />
                 )
             }

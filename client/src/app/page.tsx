@@ -94,7 +94,7 @@ export default function Home() {
             }
 
             const newPosts = postSnapshot.docs.map((doc) => ({
-                id: doc.FieldPath,
+                // id: doc.FieldPath,
                 ...doc.data(),
             }));
             setPosts((prevState: any[]) => [...prevState, ...newPosts]);
@@ -297,7 +297,7 @@ export default function Home() {
                         </div>
                         {posts.map((post: any) => (
                             <InfoCard
-                                //key={post.id} //should not use this..this is for internal react use only !!
+                                key={post.id} 
                                 imageURL={post.imageURL}
                                 owner={post.owner}
                                 description={post.description}

@@ -20,6 +20,7 @@ import { UserContext } from "../app/UserProvider";
 import { CircularProgress } from "@mui/material";
 import moment from "moment";
 import { type Moment as TMoment } from "moment";
+import { type Post } from "../../../commons/types";
 
 const style = {
     position: "absolute" as "absolute",
@@ -33,10 +34,10 @@ const style = {
     p: 4,
 };
 
-interface MakeNewPostProps {
+interface UpdatePostProps {
     open: boolean;
     onClose: () => void;
-    onPostCreated?: (post: {
+    onPostUpdated?: (post: {
         id:string,
         owner: {
           displayName: string | undefined,
@@ -49,16 +50,14 @@ interface MakeNewPostProps {
       description: string,
       location?: string
     }) => void;
+    myPost:Post;
   }
 
-const MakeNewPost = (props: MakeNewPostProps) => {
-    const {onPostCreated, open, onClose } = props;
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [textAreaValue, setTextAreaValue] = useState("");
-    const fileInput = useRef(null);
+const UpdatePost = (props: UpdatePostProps) => {
+    const {onPostUpdated, open, onClose,myPost } = props;
     const [loading, setLoading] = useState(false);
-    const [location, setLocation] = useState("");
-
+    const fileInput = useRef(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     let user: User | null = (useContext(UserContext) as unknown) as User | null;
 
@@ -169,14 +168,14 @@ const MakeNewPost = (props: MakeNewPostProps) => {
                     rows={4}
                     placeholder="Describe the item."
                     className="border-2 border-gray-300 rounded-md w-full p-2"
-                    value={textAreaValue}
+                    value={myPost.description}
                     onChange={(e) => setTextAreaValue(e.target.value)}
                 />
                 <input
                     type="text"
                     placeholder="Where did you find the item?"
                     className="border-2 border-gray-300 rounded-md w-full p-2 mt-2"
-                    value={location}
+                    value={myPost.location}
                     onChange={(e) => setLocation(e.target.value)}
                 />
                    <Button
@@ -229,4 +228,4 @@ const MakeNewPost = (props: MakeNewPostProps) => {
     );
 };
 
-export default MakeNewPost;
+export default UpdatePost;
