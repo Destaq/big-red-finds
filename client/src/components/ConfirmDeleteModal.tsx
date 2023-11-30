@@ -47,7 +47,8 @@ export default function ConfirmDeleteModal(props: {
                             color="error"
                             variant="contained"
                             className="bg-red-600"
-                            onClick={props.onDelete} 
+                            onClick={props.onDelete}
+
                         >
                             Delete
                         </Button>

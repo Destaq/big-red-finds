@@ -23,6 +23,7 @@ import {
 import { initializeApp } from "firebase/app";
 import { firebaseConfig } from "../fb_setup";
 import { User } from "../../../commons/types";
+import { Post } from "../../../commons/types";
 import {
     collection,
     getFirestore,
@@ -41,13 +42,29 @@ const auth = getAuth();
 const db = getFirestore();
 let flag = true;
 
+
 export default function Home() {
     const [isCreateNewPostOpen, setIsCreateNewPostOpen] = useState(false);
     const postsPerPage = 3;
     const [posts, setPosts] = useState([]);
     const [lastDoc, setLastDoc] = useState(null);
     const [loading, setLoading] = useState(true);
+    // const [postsDeletedOrUpdated,setPostDeletedOrUpdated] = useState(false);
 
+    function handleState(updatedPost :Post, isDeleted:boolean) {
+        // setPostDeletedOrUpdated(true);
+        if (isDeleted) {
+            setPosts(current =>
+            current.filter(post => {
+              return post.id !== updatedPost.id;
+            }),
+          );
+        } else {
+            setPosts(current);
+        }
+        console.log("state Changed from child component!");
+     }
+  
     const fetchPosts = async (lastDoc: any = null) => {
         try {
             const postCol = collection(db, "posts");
@@ -77,7 +94,7 @@ export default function Home() {
             }
 
             const newPosts = postSnapshot.docs.map((doc) => ({
-                id: doc.id,
+                id: doc.FieldPath,
                 ...doc.data(),
             }));
             setPosts((prevState: any[]) => [...prevState, ...newPosts]);
@@ -90,7 +107,7 @@ export default function Home() {
 
     useEffect(() => {
         if (flag) {
-            fetchPosts();
+                fetchPosts();
             flag = false; // don't fetch twice
         }
     }, []);
@@ -142,10 +159,10 @@ export default function Home() {
                 // An error occurred.
                 console.log(error);
             });
-    }, [handleMenuClose]);
+    }, []);
 
     // When we create a new post, we should prepend it.
-    const addPost = (post: never) => {
+    const addPost = (post: Post) => {
         setPosts([post, ...posts]);
     };
 
@@ -280,13 +297,15 @@ export default function Home() {
                         </div>
                         {posts.map((post: any) => (
                             <InfoCard
-                                key={post.id}
+                                //key={post.id} //should not use this..this is for internal react use only !!
                                 imageURL={post.imageURL}
                                 owner={post.owner}
                                 description={post.description}
                                 datetime={post.datetime.toDate()}
                                 found={post.found}
-                                location={post.location}
+                                id = {post.id}
+                                itemUpdated={false}
+                                handleStateChange={handleState}
                             />
                         ))}
                     </div>

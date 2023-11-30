@@ -7,7 +7,7 @@ import Modal from "@mui/material/Modal";
 import Button from "@mui/material/Button";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, updateDoc } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
 import {
     getStorage,
@@ -37,7 +37,8 @@ interface MakeNewPostProps {
     open: boolean;
     onClose: () => void;
     onPostCreated?: (post: {
-      owner: {
+        id:string,
+        owner: {
           displayName: string | undefined,
           email: string | undefined,
           photoURL: string | undefined,
@@ -112,6 +113,7 @@ const MakeNewPost = (props: MakeNewPostProps) => {
         try {
             const imageUrl = await uploadImageToFirebase(selectedFile);
             const post = {
+                id: "",
                 owner: {
                     displayName: user?.displayName,
                     email: user?.email,
@@ -124,7 +126,14 @@ const MakeNewPost = (props: MakeNewPostProps) => {
                 location: location,
             };
         
-            await addDoc(collection(firestore, "posts"), post); 
+            const docRef = await addDoc(collection(firestore, "posts"), post); 
+            const newPostId = docRef.id;
+            console.log(newPostId)
+            post.id = newPostId;
+            console.log(post.id)
+            await updateDoc(docRef,{id:newPostId});
+
+
             console.log("Document written");
             if (post && post.owner) {
                 // Convert to momentjs timestamp. Since calling toDate() on the frontend.

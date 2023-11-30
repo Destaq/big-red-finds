@@ -14,13 +14,19 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Menu, MenuItem } from "@mui/material";
 import Chip from "@mui/material/Chip";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
+import MakeNewPost from "./MakeNewPost";
 import { type Post } from "../../../commons/types";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import { deleteDoc, doc,updateDoc } from "firebase/firestore";
+import { collection, getFirestore } from "firebase/firestore";
 
 
 export default function InfoCard(props: Post) {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false); // State for the delete modal
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = React.useState(false); // State for the update modal
+    const [isFound, setIsFound] = React.useState(props.found);
+    const [isItemUpdated, setIsItemUpdated] = React.useState(props.itemUpdated);
 
     const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
@@ -30,10 +36,54 @@ export default function InfoCard(props: Post) {
         setAnchorEl(null);
     };
 
-    const handleDelete = () => {
-        // Add your delete logic here
-        console.log("Deleting the listing...");
+    const handleDelete = async () => {
+        try {
+            console.log("Deleting listing for " + props.description);
+            const postDocRef = doc(getFirestore(), "posts", props.id);
+            await deleteDoc(postDocRef);
+            console.log("Listing deleted successfully!");
+            setIsDeleteModalOpen(false);
+            props.handleStateChange(postDocRef,true);
+            setIsItemUpdated(true);
+        } catch (error) {
+            console.error("Error deleting listing:", error);
+        }
     };
+
+    const handleMarkAsFound = async () => {
+        try {
+            const postDocRef = doc(getFirestore(), "posts", props.id) as any; 
+            await updateDoc(postDocRef,{found:true});
+
+            
+            // await postDocRef.updateDoc({
+            //     found: true,
+            // });
+          setIsFound(true);
+          props.handleStateChange(postDocRef,false);
+          console.log("Post marked as found!");
+        } catch (error) {
+          console.error("Error marking post as found:", error);
+        }
+      };
+    
+      const handleUpdate = async () => {
+        try {
+            const postDocRef = doc(getFirestore(), "posts", props.id) as any; 
+            await updateDoc(postDocRef,{found:true});
+
+            
+            // await postDocRef.updateDoc({
+            //     found: true,
+            // });
+          setIsFound(true);
+          props.handleStateChange(postDocRef,false);
+          console.log("Post marked as found!");
+        } catch (error) {
+          console.error("Error marking post as found:", error);
+        }
+      };
+    
     
     
 
@@ -68,7 +118,11 @@ export default function InfoCard(props: Post) {
                                     "aria-labelledby": "long-button",
                                 }}
                             >
-                                <MenuItem key={"edit"} onClick={handleClose}>
+                                <MenuItem key={"edit"} onClick={ () => {
+                                    setIsUpdateModalOpen(true);
+                                    handleClose();
+                                    }}
+                                >
                                     Edit
                                 </MenuItem>
                                 <MenuItem
@@ -106,13 +160,15 @@ export default function InfoCard(props: Post) {
                     disableSpacing
                     className="-mt-2 mb-2 flex justify-center"
                 >
-                    {!props.found && (
+                    {!isFound && (
                         <Chip
                             label="Mark as Found"
                             className="cursor-pointer"
+                            onClick={handleMarkAsFound}
+
                         />
                     )}
-                    {props.found && (
+                    {isFound && (
                         <Chip
                             label="Claimed Found"
                             color="success"
@@ -122,12 +178,21 @@ export default function InfoCard(props: Post) {
                 </CardActions>
             </Card>
             {isDeleteModalOpen && (
-                <ConfirmDeleteModal
-                    open={isDeleteModalOpen}
-                    onClose={() => setIsDeleteModalOpen(false)}
-                    onDelete={handleDelete}
-                />
-            )}
+                    <ConfirmDeleteModal
+                        open={isDeleteModalOpen}
+                        onClose={() => setIsDeleteModalOpen(false)}
+                        onDelete={() => handleDelete()} 
+                        />
+                )
+            }
+            {isUpdateModalOpen && (
+                    <MakeNewPost
+                        open={isUpdateModalOpen}
+                        onClose={() => setIsUpdateModalOpen(false)}
+                        />
+                )
+            }
+
         </div>
     );
 }

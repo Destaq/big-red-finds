@@ -1,4 +1,5 @@
 type Post = {
+    id: string;
     owner: {
         displayName: string,
         email: string,
@@ -8,6 +9,8 @@ type Post = {
     found: boolean;
     description?: string; // maybe ask to include location
     location?: string;
+    itemUpdated:boolean;
+    handleStateChange:any;
 }
 
 // Rough draft, this might be handled by Firebase.
