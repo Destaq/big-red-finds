@@ -69,14 +69,21 @@ export default function InfoCard(props: Post) {
         }
       };
     
-      const handleUpdate = async () => {
+      const handleUpdate = async (updatedPost:Post) => {
         try {
             const postDocRef = doc(getFirestore(), "posts", props.id) as any; 
-            let imageURL : string = postDocRef.imageURL;
+            // let imageURL : string = postDocRef.imageURL;
             // const newPosts = postSnapshot.docs.map((doc) => ({
                 // ...doc.data(),
             // }));
+            setDescription(updatedPost.description);
+            setLocation(updatedPost.location);
+            setImageURL(updatedPost.imageURL);
 
+            // this.setState(prevState => {
+            //     return {...prevState, description:description, location:location,imageURL:imageURL};
+            // });
+            
             setIsItemUpdated(true);
             // props.handleStateChange(postDocRef,false);
             console.log("Post updated!");
@@ -143,18 +150,18 @@ export default function InfoCard(props: Post) {
                 <CardMedia
                     component="img"
                     height="194"
-                    image={props.imageURL}
-                    src={props.imageURL}
+                    image={imageURL}
+                    src={imageURL}
                     alt="Lost and found item"
                     className="p-4 border-t border-b"
                 />
                 <CardContent>
                     <Typography variant="body2" color="text.secondary">
-                        {props.description}
+                        {description}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                         <LocationOnIcon fontSize="small" sx={{ marginRight: '4px' }}></LocationOnIcon>
-                        {props.location}
+                        {location}
                     </Typography>
                 </CardContent>
                 <CardActions

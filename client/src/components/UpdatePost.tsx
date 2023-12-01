@@ -89,7 +89,7 @@ const UpdatePost = (props: UpdatePostProps) => {
     };
 
     // Add click handler here
-    const handleAddPost = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleUpdatePost = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
 
                 if (!description) {
@@ -118,7 +118,10 @@ const UpdatePost = (props: UpdatePostProps) => {
             
             const postDocRef = doc(getFirestore(), "posts", myPost.id) as any; 
             await updateDoc(postDocRef,{description:description, location:location,imageURL:tempImageUrl});
-            props.onUpdate(myPost);
+            let updatedPost : Post = { ...myPost,description:description, location:location,imageURL:imageURL};
+
+
+            props.onUpdate(updatedPost);
             console.log("Document written");
         } catch (e) {
             console.error("Error adding document: ", e);
@@ -149,14 +152,14 @@ const UpdatePost = (props: UpdatePostProps) => {
                     rows={4}
                     placeholder="Describe the item."
                     className="border-2 border-gray-300 rounded-md w-full p-2"
-                    value={myPost.description}
+                    value={description}
                     onChange={(e) => setDescription(e.target.value)}
                 />
                 <input
                     type="text"
                     placeholder="Where did you find the item?"
                     className="border-2 border-gray-300 rounded-md w-full p-2 mt-2"
-                    value={myPost.location}
+                    value={location}
                     onChange={(e) => setLocation(e.target.value)}
                 />
                    <Button
@@ -191,7 +194,7 @@ const UpdatePost = (props: UpdatePostProps) => {
                             className="mt-2 items-center justify-center self-center bg-green-700"
                             variant="contained"
                             color="success"
-                            onClick={handleAddPost}
+                            onClick={handleUpdatePost}
                         >
                             Update
                         </Button>
