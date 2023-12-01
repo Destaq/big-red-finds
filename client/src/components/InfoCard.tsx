@@ -109,7 +109,7 @@ export default function InfoCard(props: Post) {
                         " – " +
                         props.owner.email
                     }
-                    action={
+                    action={props.allowManagement &&
                         <div>
                             <IconButton
                                 aria-label="settings"

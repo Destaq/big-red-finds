@@ -11,6 +11,7 @@ type Post = {
     location?: string;
     itemUpdated:boolean;
     handleStateChange:any;
+    allowManagement:boolean;
 }
 
 // Rough draft, this might be handled by Firebase.

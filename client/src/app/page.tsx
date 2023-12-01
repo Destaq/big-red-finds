@@ -307,6 +307,7 @@ export default function Home() {
                                 location = {post.location}
                                 itemUpdated={false}
                                 handleStateChange={handleState}
+                                allowManagement={user?.email === post.owner.email}
                             />
                         ))}
                     </div>
