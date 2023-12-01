@@ -1,9 +1,13 @@
+// Rough draft, this might be handled by Firebase.
+type User = {
+    displayName: string; // Firstname Lastname
+    email: string;
+    photoURL: string;
+}
+
 type Post = {
     id: string;
-    owner: {
-        displayName: string,
-        email: string,
-    };
+    owner: User;
     datetime: string;
     imageURL: string;
     found: boolean;
@@ -12,13 +16,6 @@ type Post = {
     itemUpdated:boolean;
     handleStateChange:any;
     allowManagement:boolean;
-}
-
-// Rough draft, this might be handled by Firebase.
-type User = {
-    displayName: string; // Firstname Lastname
-    email: string;
-    photoURL: string;
 }
 
 export type { Post, User };

@@ -100,7 +100,7 @@ export default function InfoCard(props: Post) {
             <Card sx={{ maxWidth: 345 }}>
                 <CardHeader
                     avatar={
-                        <Avatar sx={{ bgcolor: red[500] }}>
+                        <Avatar sx={{ bgcolor: red[500] }} src={props.owner.photoURL}>
                             {props.owner.displayName.slice(0, 2).toUpperCase()}
                         </Avatar>
                     }
