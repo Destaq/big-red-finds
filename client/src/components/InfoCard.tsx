@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import  { useState, useRef, useContext } from "react";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import CardMedia from "@mui/material/CardMedia";
@@ -22,11 +23,14 @@ import { collection, getFirestore } from "firebase/firestore";
 
 
 export default function InfoCard(props: Post) {
-    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false); // State for the delete modal
-    const [isUpdateModalOpen, setIsUpdateModalOpen] = React.useState(false); // State for the update modal
-    const [isFound, setIsFound] = React.useState(props.found);
-    const [isItemUpdated, setIsItemUpdated] = React.useState(props.itemUpdated);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // State for the delete modal
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // State for the update modal
+    const [isFound, setIsFound] = useState(props.found);
+    const [isItemUpdated, setIsItemUpdated] = useState(props.itemUpdated);
+    const [description, setDescription] = useState(props.description);
+    const [location, setLocation] = useState(props.location);
+    const [imageURL, setImageURL] = useState(props.imageURL);
 
     const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
@@ -57,7 +61,7 @@ export default function InfoCard(props: Post) {
 
             
           setIsFound(true);
-          props.handleStateChange(postDocRef,false);
+          // props.handleStateChange(postDocRef,false);
           console.log("Post marked as found!");
         } catch (error) {
           console.error("Error marking post as found:", error);
@@ -67,6 +71,10 @@ export default function InfoCard(props: Post) {
       const handleUpdate = async () => {
         try {
             const postDocRef = doc(getFirestore(), "posts", props.id) as any; 
+            let imageURL : string = postDocRef.imageURL;
+            // const newPosts = postSnapshot.docs.map((doc) => ({
+                // ...doc.data(),
+            // }));
 
             setIsItemUpdated(true);
             // props.handleStateChange(postDocRef,false);
@@ -78,9 +86,6 @@ export default function InfoCard(props: Post) {
           console.error("Error updating post :", error);
         }
       };
-    
-    
-    
 
     return (
         <div>
