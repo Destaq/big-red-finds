@@ -56,9 +56,6 @@ export default function InfoCard(props: Post) {
             await updateDoc(postDocRef,{found:true});
 
             
-            // await postDocRef.updateDoc({
-            //     found: true,
-            // });
           setIsFound(true);
           props.handleStateChange(postDocRef,false);
           console.log("Post marked as found!");
@@ -70,12 +67,15 @@ export default function InfoCard(props: Post) {
       const handleUpdate = async () => {
         try {
             const postDocRef = doc(getFirestore(), "posts", props.id) as any; 
-            await updateDoc(postDocRef,{found:true});
-            
-          props.handleStateChange(postDocRef,false);
-          console.log("Post marked as found!");
+
+            setIsItemUpdated(true);
+            // props.handleStateChange(postDocRef,false);
+            console.log("Post updated!");
+
+            setIsItemUpdated(false);
+
         } catch (error) {
-          console.error("Error marking post as found:", error);
+          console.error("Error updating post :", error);
         }
       };
     
@@ -185,6 +185,8 @@ export default function InfoCard(props: Post) {
                         open={isUpdateModalOpen}
                         onClose={() => setIsUpdateModalOpen(false)}
                         myPost={props}
+                        onUpdate={handleUpdate} 
+
                         />
                 )
             }

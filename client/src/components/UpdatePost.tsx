@@ -7,7 +7,7 @@ import Modal from "@mui/material/Modal";
 import Button from "@mui/material/Button";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { collection, addDoc, updateDoc } from "firebase/firestore";
+import { doc, collection, addDoc, updateDoc } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
 import {
     getStorage,
@@ -37,27 +37,18 @@ const style = {
 interface UpdatePostProps {
     open: boolean;
     onClose: () => void;
-    onPostUpdated?: (post: {
-        id:string,
-        owner: {
-          displayName: string | undefined,
-          email: string | undefined,
-          photoURL: string | undefined,
-      },
-      datetime: Date | TMoment,
-      imageURL: string,
-      found: boolean,
-      description: string,
-      location?: string
-    }) => void;
+    onUpdate: (post: Post)=>void,
     myPost:Post;
   }
 
 const UpdatePost = (props: UpdatePostProps) => {
-    const {onPostUpdated, open, onClose,myPost } = props;
+    const {onUpdate, open, onClose,myPost } = props;
     const [loading, setLoading] = useState(false);
     const fileInput = useRef(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [description, setDescription] = useState(myPost.description);
+    const [location, setLocation] = useState(myPost.location);
+    const [imageURL, setImageURL] = useState(myPost.imageURL);
 
     let user: User | null = (useContext(UserContext) as unknown) as User | null;
 
@@ -100,53 +91,43 @@ const UpdatePost = (props: UpdatePostProps) => {
     // Add click handler here
     const handleAddPost = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-        if (!selectedFile) {
-            alert("Please select an image to upload.");
-            return;
-        }
-        if (!textAreaValue) {
+
+                if (!description) {
             alert("Please enter a description.");
             return;
         }
+        if (!location) {
+                        alert("Please enter a location.");
+            return;
+        }
+
+        let tempImageUrl:string ;
+        tempImageUrl= imageURL;
 
         try {
-            const imageUrl = await uploadImageToFirebase(selectedFile);
-            const post = {
-                id: "",
-                owner: {
-                    displayName: user?.displayName,
-                    email: user?.email,
-                    photoURL: user?.photoURL,
-                },
-                datetime: new Date() as Date | TMoment,
-                imageURL: imageUrl,
-                found: false,
-                description: textAreaValue,
-                location: location,
-            };
-        
-            const docRef = await addDoc(collection(firestore, "posts"), post); 
-            const newPostId = docRef.id;
-            console.log(newPostId)
-            post.id = newPostId;
-            console.log(post.id)
-            await updateDoc(docRef,{id:newPostId});
-
-
-            console.log("Document written");
-            if (post && post.owner) {
-                // Convert to momentjs timestamp. Since calling toDate() on the frontend.
-                post.datetime = moment(post.datetime);
-                onPostCreated!(post); // add the new post to the frontend view
+            if (selectedFile) {
+              tempImageUrl = await uploadImageToFirebase(selectedFile);
             }
+             
+            if (description)
+                setDescription(description);
+            if (location)
+                setLocation(location);
+            if (tempImageUrl)
+                setImageURL(tempImageUrl);
+            
+            const postDocRef = doc(getFirestore(), "posts", myPost.id) as any; 
+            await updateDoc(postDocRef,{description:description, location:location,imageURL:tempImageUrl});
+            props.onUpdate(myPost);
+            console.log("Document written");
         } catch (e) {
             console.error("Error adding document: ", e);
         } finally {
             setLoading(false); // End loading
             onClose(); // Close modal
-            setTextAreaValue(""); // Clear text area
-            setSelectedFile(null); // Clear file input
-            setLocation("")
+            setDescription(myPost.description); // Clear text area
+            setImageURL(myPost.imageURL); // Clear file input
+            setLocation(myPost.location)
         }
     };
 
@@ -162,14 +143,14 @@ const UpdatePost = (props: UpdatePostProps) => {
                     id="modal-modal-title"
                     className="text-center text-lg text-black font-bold mb-2"
                 >
-                    Create new post
+                    Update post
                 </Typography>
                 <textarea
                     rows={4}
                     placeholder="Describe the item."
                     className="border-2 border-gray-300 rounded-md w-full p-2"
                     value={myPost.description}
-                    onChange={(e) => setTextAreaValue(e.target.value)}
+                    onChange={(e) => setDescription(e.target.value)}
                 />
                 <input
                     type="text"
@@ -212,7 +193,7 @@ const UpdatePost = (props: UpdatePostProps) => {
                             color="success"
                             onClick={handleAddPost}
                         >
-                            Add
+                            Update
                         </Button>
                         <Button
                             className="mt-2 items-center justify-center self-center"

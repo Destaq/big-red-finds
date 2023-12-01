@@ -304,6 +304,7 @@ export default function Home() {
                                 datetime={post.datetime.toDate()}
                                 found={post.found}
                                 id = {post.id}
+                                location = {post.location}
                                 itemUpdated={false}
                                 handleStateChange={handleState}
                             />
